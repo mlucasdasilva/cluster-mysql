@@ -1,0 +1,76 @@
+version: '2'
+#version: '3.1'
+services:
+  management1:
+    image: mysql/mysql-cluster
+    volumes:
+       - ./mysql.conf/my.cnf:/etc/my.cnf
+       - ./mysql.conf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+    #command: "ndb_mgmd --ndb-nodeid=1"
+    command: ndb_mgmd
+    networks:
+      mysqlcluster:
+#        ipv4_address: 192.168.0.2
+        ipv4_address: 172.28.0.2
+  ndb1:
+    image: mysql/mysql-cluster
+    volumes:
+       - ./mysql.conf/my.cnf:/etc/my.cnf
+       - ./mysql.conf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+    #command: bash -c 'sleep 40; exec ndbd'
+    command: ndbd
+    depends_on:
+      - "management1"
+    networks:
+      mysqlcluster:
+#        ipv4_address: 192.168.0.3
+        ipv4_address: 172.28.0.3
+  ndb2:
+    image: mysql/mysql-cluster
+    volumes:
+       - ./mysql.conf/my.cnf:/etc/my.cnf
+       - ./mysql.conf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+    #command: bash -c 'sleep 40; exec ndbd'
+    command: ndbd
+    depends_on:
+      - "management1"
+    networks:
+      mysqlcluster:
+#        ipv4_address: 192.168.0.4
+        ipv4_address: 172.28.0.4
+  mysql1:
+    image: mysql/mysql-cluster
+    ports:
+      - "3306:3306"
+    volumes:
+       - ./mysql.conf/my.cnf:/etc/my.cnf
+       - ./mysql.conf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+#    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: bdteste
+      MYSQL_USER: teste
+      MYSQL_PASSWORD: teste
+    #command: bash -c 'sleep 60; exec mysqld'
+    command: mysqld
+    depends_on:
+      - "management1"
+      - "ndb1"
+      - "ndb2"
+    networks:
+      mysqlcluster:
+#        ipv4_address: 192.168.0.10
+        ipv4_address: 172.28.0.10
+
+networks:
+ mysqlcluster:
+#  driver: overlay
+  driver: bridge
+  ipam:
+   config:
+#    - subnet: 192.168.0.0/16
+    - subnet: 172.28.0.0/16
+      gateway: 172.28.5.254
+##    - ip-range: 172.28.5.0/24
+
+#  docker run -it -v "$PWD/mysql.conf/my.cnf:/etc/my.cnf" -v "$PWD/mysql.conf/mysql-cluster.cnf:/etc/mysql-cluster.cnf" --net=mysqlcluster_mysqlcluster mysql/mysql-cluster ndb_mgm
