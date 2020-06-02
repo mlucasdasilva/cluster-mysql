@@ -51,6 +51,7 @@ services:
       MYSQL_DATABASE: bdteste
       MYSQL_USER: teste
       MYSQL_PASSWORD: teste
+      MYSQL_ROOT_HOST: '%'
     #command: bash -c 'sleep 60; exec mysqld'
     command: mysqld
     depends_on:
