@@ -68,6 +68,8 @@ services:
       - 8081:8080
     links:
       - mysql1:db
+    networks:
+      mysqlcluster:
 
 networks:
  mysqlcluster:
