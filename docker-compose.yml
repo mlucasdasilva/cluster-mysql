@@ -61,17 +61,13 @@ services:
       mysqlcluster:
 #        ipv4_address: 192.168.0.10
         ipv4_address: 172.28.0.10
-
   adminer:
     image: adminer
     restart: always
     ports:
       - 8081:8080
     links:
-      - mariadb:db
-
-
-
+      - mysql1:db
 
 networks:
  mysqlcluster:
